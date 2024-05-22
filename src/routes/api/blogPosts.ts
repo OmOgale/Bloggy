@@ -9,6 +9,7 @@ import {
   searchBlogs,
   createBlogPost,
 } from "../../controllers/blogPostController";
+import apicache from "apicache";
 
 const router = Router();
 
@@ -26,7 +27,6 @@ router.route("/likes").get(retrievePostLikes);
 
 router.route("/search").get((req: Request, res: Response) => {
   const searchTerm = req?.query?.searchTerm;
-  console.log(searchTerm)
   if (!searchTerm) return res.status(400).json({ message: "Search term required." });
   return searchBlogs(req, res, searchTerm);
 });
