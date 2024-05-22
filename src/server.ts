@@ -11,12 +11,16 @@ import blogPostRouter from "./routes/api/blogPosts";
 import userRouter from "./routes/api/users";
 import errorHandler from "./middleware/errorHandler";
 import cookieParser  from "cookie-parser";
+import helmet from "helmet";
 
 config();
 
 const app = express();
 
 const PORT = process.env.PORT || 3500;
+
+// Helmet middleware to set HTTP headers.
+app.use(helmet());
 
 // Connect to MongoDB
 connectDB();
