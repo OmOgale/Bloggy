@@ -2,11 +2,11 @@
   "name": "bloggy",
   "version": "1.0.0",
   "description": "Backend server to handle my portfolio blog.",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
     "build": "npx tsc",
-    "start": "node --experimental-loader tsc-module-loader dist/index.js",
-    "dev": "nodemon src/index.ts",
+    "start": "node --experimental-loader tsc-module-loader dist/server.js",
+    "dev": "nodemon src/server.ts",
     "postbuild": "ncp src/views dist/views"
   },
   "engines": {
