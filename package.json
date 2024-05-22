@@ -1,0 +1,37 @@
+{
+  "name": "bloggy",
+  "version": "1.0.0",
+  "description": "Backend server to handle my portfolio blog.",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node --experimental-loader tsc-module-loader dist/server.js",
+    "dev": "nodemon src/server.ts",
+    "postbuild": "ncp src/views dist/views"
+  },
+  "engines": {
+    "node": "14.x"
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "date-fns": "^2.23.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^8.4.0",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.21",
+    "@types/mongoose": "^5.11.97",
+    "ncp": "^2.0.0",
+    "nodemon": "^2.0.12",
+    "ts-node": "^10.9.2",
+    "tsc-module-loader": "^0.0.1"
+  }
+}
