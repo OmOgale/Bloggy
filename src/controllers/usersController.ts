@@ -65,7 +65,7 @@ export const handleNewLikes = async (req: Request, res: Response) => {
       await handleNewUser(hashedIp);
       await User.findOneAndUpdate(
         { ip: hashedIp },
-        { $set: { [`likes.${uuidBlog}`]: likes } }
+        { $inc: { [`likes.${uuidBlog}`]: likes } }
       );
       await handlePostLikes(uuidBlog, likes);
       res
@@ -78,7 +78,7 @@ export const handleNewLikes = async (req: Request, res: Response) => {
     try {
       await User.findOneAndUpdate(
         { ip: hashedIp },
-        { $set: { [`likes.${uuidBlog}`]: likes } }
+        { $inc: { [`likes.${uuidBlog}`]: likes } }
       );
       await handlePostLikes(uuidBlog, likes);
       res
