@@ -105,6 +105,7 @@ const searchBlogPosts = async (searchTerm: SearchType) => {
           tags: 1,
           title: 1,
           summary: 1,
+          uuid: 1,
           content: 1,
           categories: 1,
           published: 1,
