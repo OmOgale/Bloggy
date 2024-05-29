@@ -85,7 +85,7 @@ const searchBlogPosts = async (searchTerm: SearchType) => {
               wildcard: "*",
             },
             fuzzy: {
-              maxEdits: 2,
+              maxEdits: 1,
             },
           },
         },
