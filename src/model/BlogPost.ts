@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import { BlogPost } from "../utils/types";
+import { parametrizeTitle } from "../utils/methods";
 
 const blogPostSchema = new Schema<BlogPost>({
   uuid: {
@@ -13,6 +14,10 @@ const blogPostSchema = new Schema<BlogPost>({
   views: {
     type: Number,
     default: 0,
+  },
+  slug: {
+    type: String,
+    unique: true,
   },
   title: {
     type: String,
@@ -55,6 +60,15 @@ const blogPostSchema = new Schema<BlogPost>({
     type: Boolean,
     required: true,
   },
+});
+
+blogPostSchema.pre('save', function(next) {
+  if (!this.isModified("title")) {
+    return next();
+  }
+
+  this.slug = parametrizeTitle(this.title);
+  next();
 });
 
 const blogPostModel =  model("BlogPost", blogPostSchema, "BlogPosts");

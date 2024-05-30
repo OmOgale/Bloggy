@@ -61,10 +61,11 @@ export const createBlogPost = async (req: Request, res: Response) => {
       .status(400)
       .json({ message: "Post required and should be in correct format." });
   try {
-    await BlogPost.create({
+    const newPost = new BlogPost({
       ...post,
       uuid: uuid(),
     });
+    await newPost.save();
     return res.status(201).json({ message: "New post created." });
   } catch (err) {
     return res.status(500).json({ message: err.message });

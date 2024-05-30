@@ -9,6 +9,7 @@ export interface BlogPost {
   uuid: string;
   tags: Array<string>;
   title: string;
+  slug: string;
   summary: string;
   content: string;
   userAvatars: Array<string>;
