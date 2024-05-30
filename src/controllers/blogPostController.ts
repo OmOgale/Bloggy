@@ -19,20 +19,20 @@ export const getInitialBlogPosts = async (req: Request, res: Response) => {
 };
 
 export const getBlogPost = async (req: Request, res: Response) => {
-  if (!req?.params?.uuid)
+  if (!req?.params?.slug)
     return res
       .status(400)
-      .json({ message: "UUID for retrieving blog post required." });
+      .json({ message: "Slug for retrieving blog post required." });
 
   await BlogPost.findOneAndUpdate(
-    { uuid: req.params.uuid },
+    { slug: req?.params?.slug },
     { $inc: { views: 1 } }
   );
-  const blogPost = await BlogPost.findOne({ uuid: req.params.uuid }).exec();
+  const blogPost = await BlogPost.findOne({ slug: req?.params?.slug }).exec();
   if (!blogPost) {
     return res
       .status(204)
-      .json({ message: `No blog post matching uuid ${req?.params?.uuid}.` });
+      .json({ message: `No blog post matching uuid ${req?.params?.slug}.` });
   }
   res.json(blogPost);
 };

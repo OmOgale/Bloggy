@@ -31,6 +31,6 @@ router.route("/search").get((req: Request, res: Response) => {
   return searchBlogs(req, res, searchTerm);
 });
 
-router.route("/:uuid").get(getBlogPost);
+router.route("/:slug").get(getBlogPost);
 
 export default router;
