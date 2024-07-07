@@ -30,7 +30,7 @@ export const retrieveLikes = async (req: Request, res: Response) => {
   }
 
   const likes = user.likes[uuidBlog];
-  if (!likes) return res.status(204).json(0);
+  if (!likes) return res.status(204).json("0");
   res.json(likes);
 };
 
