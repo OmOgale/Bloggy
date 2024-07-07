@@ -37,15 +37,13 @@ app.use(express.json());
 //middleware for cookies
 app.use(cookieParser());
 
-//serve static files
-app.use("/", cors(), express.static(path.join(__dirname, "/public")));
+app.use(cors({ origin: "*" })); // TODO: change to corsOptions
 
-app.use(cors(corsOptions));
+//serve static files
+app.use("/", express.static(path.join(__dirname, "/public")));
 
 // routes
 app.use("/", rootRouter);
-
-// app.use(cors({ origin: "*" })); // TODO: change to corsOptions
 
 app.use("/blog-posts", blogPostRouter);
 app.use("/users", userRouter);
