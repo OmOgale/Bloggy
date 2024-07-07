@@ -49,8 +49,8 @@ const handlePostLikes = async (uuidBlog: string, likes: number) => {
 };
 
 export const handleNewLikes = async (req: Request, res: Response) => {
-  const { likes, uuidBlog, ip } = req.body;
-  if (!uuidBlog || !ip || !likes)
+  const { uuidBlog, ip } = req.body;
+  if (!uuidBlog || !ip)
     return res
       .status(400)
       .json({ message: "Required fields are missing to handle likes." });
@@ -65,12 +65,12 @@ export const handleNewLikes = async (req: Request, res: Response) => {
       await handleNewUser(hashedIp);
       await User.findOneAndUpdate(
         { ip: hashedIp },
-        { $inc: { [`likes.${uuidBlog}`]: likes } }
+        { $inc: { [`likes.${uuidBlog}`]: 1} }
       );
-      await handlePostLikes(uuidBlog, likes);
+      await handlePostLikes(uuidBlog, 1);
       res
         .status(201)
-        .json({ success: `New user ${ip} with like count ${likes} created!` });
+        .json({ success: `New user ${ip} with like count 1 created!` });
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
@@ -78,12 +78,12 @@ export const handleNewLikes = async (req: Request, res: Response) => {
     try {
       await User.findOneAndUpdate(
         { ip: hashedIp },
-        { $inc: { [`likes.${uuidBlog}`]: likes } }
+        { $inc: { [`likes.${uuidBlog}`]: 1} }
       );
-      await handlePostLikes(uuidBlog, likes);
+      await handlePostLikes(uuidBlog, 1);
       res
         .status(201)
-        .json({ success: `User ${ip} with like count ${likes} updated!` });
+        .json({ success: `User ${ip} with like count updated!` });
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
