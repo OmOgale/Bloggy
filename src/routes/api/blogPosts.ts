@@ -23,7 +23,7 @@ router.route("/").get((req: Request, res: Response) => {
 
 router.route("/tags").get(getAllTags);
 
-router.route("/likes").get(retrievePostLikes);
+router.route("/likes/:uuidBlog").get(retrievePostLikes);
 
 router.route("/search").get((req: Request, res: Response) => {
   const searchTerm = req?.query?.searchTerm;

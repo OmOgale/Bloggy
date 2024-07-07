@@ -44,7 +44,7 @@ export const getAllTags = async (req: Request, res: Response) => {
 };
 
 export const retrievePostLikes = async (req: Request, res: Response) => {
-  const { uuidBlog } = req.body;
+  const uuidBlog  = req.params?.uuidBlog;
   try {
     const post = await BlogPost.findOne({ uuid: uuidBlog }).exec();
     if (!post) return res.status(204).json({ message: "No post found" });
