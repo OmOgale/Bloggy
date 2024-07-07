@@ -28,9 +28,6 @@ connectDB();
 // custom middleware logger
 app.use(logger);
 
-// Cross Origin Resource Sharing
-app.use(cors({ origin: "*" })); // TODO: change to corsOptions
-
 // built-in middleware to handle urlencoded form data
 app.use(express.urlencoded({ extended: false }));
 
@@ -45,6 +42,10 @@ app.use("/", express.static(path.join(__dirname, "/public")));
 
 // routes
 app.use("/", rootRouter);
+
+// app.use(cors({ origin: "*" })); // TODO: change to corsOptions
+
+app.use(cors(corsOptions));
 
 app.use("/blog-posts", blogPostRouter);
 app.use("/users", userRouter);
