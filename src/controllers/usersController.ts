@@ -20,7 +20,6 @@ export const retrieveLikes = async (req: Request, res: Response) => {
 
   const hashedIp = hashWord(ip);
   const user = await User.findOne({ ip: hashedIp }).exec();
-  console.log(hashedIp)
   if (!user) {
     try {
       await handleNewUser(hashedIp);
@@ -30,10 +29,7 @@ export const retrieveLikes = async (req: Request, res: Response) => {
     }
   }
 
-
-  console.log(user.likes)
-  const likes = user.likes[uuidBlog];
-  console.log(likes)
+  const likes = user.likes.get(uuidBlog);
   if (!likes) return res.status(201).json(0);
   res.json(`${likes}`);
 };

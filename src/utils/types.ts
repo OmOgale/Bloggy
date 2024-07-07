@@ -1,8 +1,6 @@
 export interface User {
   ip: string; // Hashed ip-address of the user
-  likes: {
-    [blogID: string]: number;
-  };
+  likes: Map<string, number>; // Map of blog uuids and the number of likes
 }
 
 export interface BlogPost {
