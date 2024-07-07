@@ -11,7 +11,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
 export const retrieveLikes = async (req: Request, res: Response) => {
   const ip = req?.params?.ip;
-  const { uuidBlog } = req?.body;
+  const uuidBlog = req?.params?.uuidBlog;
   if (!ip || !uuidBlog) {
     return res
       .status(400)
