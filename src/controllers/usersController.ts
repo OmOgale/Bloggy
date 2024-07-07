@@ -20,6 +20,7 @@ export const retrieveLikes = async (req: Request, res: Response) => {
 
   const hashedIp = hashWord(ip);
   const user = await User.findOne({ ip: hashedIp }).exec();
+  console.log(hashedIp)
   if (!user) {
     try {
       await handleNewUser(hashedIp);
