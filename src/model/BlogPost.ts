@@ -6,6 +6,7 @@ const blogPostSchema = new Schema<BlogPost>({
   uuid: {
     type: String,
     required: true,
+    unique: true,
   },
   tags: {
     type: [String],
