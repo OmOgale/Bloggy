@@ -37,7 +37,7 @@ app.use(express.json());
 //middleware for cookies
 app.use(cookieParser());
 
-app.use(cors(corsOptions)); // TODO: change to corsOptions
+app.use(cors({ origin: "*" })); // TODO: change to corsOptions
 
 //serve static files
 app.use("/", express.static(path.join(__dirname, "/public")));
