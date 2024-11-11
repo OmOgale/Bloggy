@@ -1,6 +1,5 @@
 import BlogPost from "../model/BlogPost";
 import { Request, Response } from "express";
-import { BlogPost as BlogType } from "../utils/types";
 import { ParsedQs } from "qs";
 import { v4 as uuid } from "uuid";
 
