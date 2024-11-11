@@ -31,7 +31,7 @@ export const retrieveLikes = async (req: Request, res: Response) => {
 
   const likes = user.likes.get(uuidBlog);
   if (!likes) return res.status(201).json(0);
-  res.json(`${likes}`);
+  res.json(likes);
 };
 
 const handleNewUser = async (ip: string) => {
