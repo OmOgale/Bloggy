@@ -23,15 +23,14 @@ export const retrieveLikes = async (req: Request, res: Response) => {
   if (!user) {
     try {
       await handleNewUser(hashedIp);
-      res.status(201).json({ message: `New user ${ip} created!` });
+      return res.status(200).json(0);
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
     }
   }
 
-  const likes = user.likes.get(uuidBlog);
-  if (!likes) return res.status(201).json(0);
-  res.json(`${likes}`);
+  const likes = user.likes?.get(uuidBlog) ?? 0;
+  return res.status(200).json(likes);
 };
 
 const handleNewUser = async (ip: string) => {
