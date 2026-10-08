@@ -9,7 +9,7 @@ import {
   searchBlogs,
   createBlogPost,
 } from "../../controllers/blogPostController";
-import apicache from "apicache";
+import requireKey from "../../middleware/requireKey";
 
 const router = Router();
 
@@ -19,7 +19,7 @@ router.route("/").get((req: Request, res: Response) => {
   } else {
     return getAllBlogPosts(req, res);
   }
-}).post(createBlogPost);
+}).post(requireKey("ADMIN_API_KEY"), createBlogPost);
 
 router.route("/tags").get(getAllTags);
 
@@ -27,7 +27,8 @@ router.route("/likes/:uuidBlog").get(retrievePostLikes);
 
 router.route("/search").get((req: Request, res: Response) => {
   const searchTerm = req?.query?.searchTerm;
-  if (!searchTerm) return res.status(400).json({ message: "Search term required." });
+  if (typeof searchTerm !== "string" || !searchTerm.trim() || searchTerm.length > 200)
+    return res.status(400).json({ message: "Search term required, up to 200 characters." });
   return searchBlogs(req, res, searchTerm);
 });
 

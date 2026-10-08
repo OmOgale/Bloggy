@@ -5,6 +5,7 @@ const userSchema = new Schema<User>({
   ip: {
     type: String,
     required: true,
+    unique: true,
   },
   likes: {
       type: Map,

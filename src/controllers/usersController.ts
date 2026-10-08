@@ -3,88 +3,63 @@ import User from "../model/User";
 import { hashWord } from "../utils/methods";
 import { Request, Response } from "express";
 
-export const getAllUsers = async (req: Request, res: Response) => {
-  const users = await User.find().exec();
-  if (!users) return res.status(204).json({ message: "No users found" });
-  res.json(users);
-};
+// A soroban rod tops out at 9 (one 5-bead plus four 1-beads), so that's each reader's limit per post.
+const MAX_LIKES_PER_READER = 9;
+
+// Post uuids are v4 uuids. Checking the shape also keeps `.` and `$` out of the `likes.<uuid>` update path.
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const DUPLICATE_KEY = 11000;
 
 export const retrieveLikes = async (req: Request, res: Response) => {
   const ip = req?.params?.ip;
   const uuidBlog = req?.params?.uuidBlog;
-  if (!ip || !uuidBlog) {
+  if (!ip || !uuidBlog || !UUID_PATTERN.test(uuidBlog)) {
     return res
       .status(400)
       .json({ message: "Required fields are missing to retrieve likes." });
   }
 
-  const hashedIp = hashWord(ip);
-  const user = await User.findOne({ ip: hashedIp }).exec();
-  if (!user) {
-    try {
-      await handleNewUser(hashedIp);
-      return res.status(200).json(0);
-    } catch (err) {
-      return res.status(500).json({ message: err.message });
-    }
+  try {
+    const user = await User.findOne({ ip: hashWord(ip) }).exec();
+    return res.status(200).json(user?.likes?.get(uuidBlog) ?? 0);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
-
-  const likes = user.likes?.get(uuidBlog) ?? 0;
-  return res.status(200).json(likes);
-};
-
-const handleNewUser = async (ip: string) => {
-  await User.create({
-    ip: ip,
-    likes: {},
-  });
-};
-
-const handlePostLikes = async (uuidBlog: string, likes: number) => {
-  await BlogPost.findOneAndUpdate(
-    { uuid: uuidBlog },
-    { $inc: { likes: likes } }
-  );
 };
 
 export const handleNewLikes = async (req: Request, res: Response) => {
   const { uuidBlog, ip } = req.body;
-  if (!uuidBlog || !ip)
+  if (typeof uuidBlog !== "string" || typeof ip !== "string" || !ip || !UUID_PATTERN.test(uuidBlog))
     return res
       .status(400)
       .json({ message: "Required fields are missing to handle likes." });
-  // const hashedPwd = await bcrypt.hash(ip, 10);
-  // check for duplicate usernames in the db
-  const hashedIp = hashWord(ip);
-  const duplicate = await User.findOne({ ip: hashedIp }).exec();
 
-  if (!duplicate) {
+  try {
+    const post = await BlogPost.exists({ uuid: uuidBlog, published: true });
+    if (!post) return res.status(404).json({ message: "No post found." });
+
+    const field = `likes.${uuidBlog}`;
+    let user;
     try {
-      //create and store the new user
-      await handleNewUser(hashedIp);
-      await User.findOneAndUpdate(
-        { ip: hashedIp },
-        { $inc: { [`likes.${uuidBlog}`]: 1} }
-      );
-      await handlePostLikes(uuidBlog, 1);
-      res
-        .status(201)
-        .json({ success: `New user ${ip} with like count 1 created!` });
+      // Count the like only while the reader is under the limit; the upsert creates them on their first like.
+      // At the limit the filter misses, the upsert tries to insert a second copy of the reader,
+      // and the unique index on `ip` rejects it.
+      user = await User.findOneAndUpdate(
+        { ip: hashWord(ip), [field]: { $not: { $gte: MAX_LIKES_PER_READER } } },
+        { $inc: { [field]: 1 } },
+        { upsert: true, new: true }
+      ).exec();
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      if (err.code === DUPLICATE_KEY) {
+        return res.status(409).json({ message: "Like limit reached.", likes: MAX_LIKES_PER_READER });
+      }
+      throw err;
     }
-  } else {
-    try {
-      await User.findOneAndUpdate(
-        { ip: hashedIp },
-        { $inc: { [`likes.${uuidBlog}`]: 1} }
-      );
-      await handlePostLikes(uuidBlog, 1);
-      res
-        .status(201)
-        .json({ success: `User ${ip} with like count updated!` });
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
+
+    await BlogPost.updateOne({ uuid: uuidBlog }, { $inc: { likes: 1 } });
+    return res.status(201).json({ likes: user.likes.get(uuidBlog) });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };

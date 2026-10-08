@@ -1,18 +1,18 @@
 import BlogPost from "../model/BlogPost";
 import { Request, Response } from "express";
-import { ParsedQs } from "qs";
 import { v4 as uuid } from "uuid";
 
-type SearchType = string | ParsedQs | string[] | ParsedQs[];
+// Drafts stay in the database but are never served.
+const PUBLISHED = { published: true };
 
 export const getAllBlogPosts = async (req: Request, res: Response) => {
-  const blogPosts = await BlogPost.find().exec();
+  const blogPosts = await BlogPost.find(PUBLISHED).exec();
   if (!blogPosts) return res.status(204).json({ message: "No posts found." });
   res.json(blogPosts);
 };
 
 export const getInitialBlogPosts = async (req: Request, res: Response) => {
-  const blogPosts = await BlogPost.find().select({ content: 0 }).exec();
+  const blogPosts = await BlogPost.find(PUBLISHED).select({ content: 0 }).exec();
   if (!blogPosts) return res.status(204).json({ message: "No posts found." });
   res.json(blogPosts);
 };
@@ -23,21 +23,21 @@ export const getBlogPost = async (req: Request, res: Response) => {
       .status(400)
       .json({ message: "Slug for retrieving blog post required." });
 
-  await BlogPost.findOneAndUpdate(
-    { slug: req?.params?.slug },
-    { $inc: { views: 1 } }
-  );
-  const blogPost = await BlogPost.findOne({ slug: req?.params?.slug }).exec();
+  const blogPost = await BlogPost.findOneAndUpdate(
+    { slug: req?.params?.slug, ...PUBLISHED },
+    { $inc: { views: 1 } },
+    { new: true }
+  ).exec();
   if (!blogPost) {
     return res
-      .status(204)
-      .json({ message: `No blog post matching uuid ${req?.params?.slug}.` });
+      .status(404)
+      .json({ message: `No blog post matching slug ${req?.params?.slug}.` });
   }
   res.json(blogPost);
 };
 
 export const getAllTags = async (req: Request, res: Response) => {
-  const tags = await BlogPost.find().distinct("tags").exec();
+  const tags = await BlogPost.find(PUBLISHED).distinct("tags").exec();
   if (!tags) return res.status(204).json({ message: "No tags found." });
   res.json(tags);
 };
@@ -45,8 +45,8 @@ export const getAllTags = async (req: Request, res: Response) => {
 export const retrievePostLikes = async (req: Request, res: Response) => {
   const uuidBlog  = req.params?.uuidBlog;
   try {
-    const post = await BlogPost.findOne({ uuid: uuidBlog }).exec();
-    if (!post) return res.status(204).json({ message: "No post found" });
+    const post = await BlogPost.findOne({ uuid: uuidBlog, ...PUBLISHED }).exec();
+    if (!post) return res.status(404).json({ message: "No post found" });
     res.json(post.likes);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -71,45 +71,29 @@ export const createBlogPost = async (req: Request, res: Response) => {
   }
 };
 
-const searchBlogPosts = async (searchTerm: SearchType) => {
+// Returns the uuids of matching published posts, best match first.
+const searchBlogPosts = async (searchTerm: string) => {
   let results = [];
   try {
-    // @ts-ignore
     results = await BlogPost.aggregate([
       {
         $search: {
           index: "searchBlogs",
           text: {
             query: searchTerm,
-            path: {
-              wildcard: "*",
-            },
+            path: ["title", "summary", "content", "tags"],
             fuzzy: {
               maxEdits: 1,
             },
           },
         },
       },
-      {
-        $addFields: {
-          score: { $meta: "searchScore" },
-        },
-      },
-      {
-        $sort: {
-          score: -1,
-        },
-      },
+      { $match: PUBLISHED },
       {
         $project: {
-          tags: 1,
-          title: 1,
-          summary: 1,
+          _id: 0,
           uuid: 1,
-          content: 1,
-          categories: 1,
-          published: 1,
-          score: 1,
+          score: { $meta: "searchScore" },
         },
       },
     ]);
@@ -123,7 +107,7 @@ const searchBlogPosts = async (searchTerm: SearchType) => {
 export const searchBlogs = async (
   req: Request,
   res: Response,
-  searchTerm: SearchType
+  searchTerm: string
 ) => {
   let results = [];
   try {
