@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 import connectDB from "./config/dbConn";
 import rootRouter from "./routes/root";
 import blogPostRouter from "./routes/api/blogPosts";
-import userRouter from "./routes/api/users";
+import readerRouter from "./routes/api/readers";
 import errorHandler from "./middleware/errorHandler";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
@@ -46,7 +46,7 @@ app.use("/", express.static(path.join(__dirname, "/public")));
 app.use("/", rootRouter);
 
 app.use("/blog-posts", blogPostRouter);
-app.use("/users", userRouter);
+app.use("/readers", readerRouter);
 
 app.all("*", (req, res) => {
   res.status(404);
